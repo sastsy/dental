@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "261842988927",
+    "project_id": "auth-cdea4",
+    "storage_bucket": "auth-cdea4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:261842988927:android:7f0089f934a63b8216744a",
+        "android_client_info": {
+          "package_name": "ru.sastsy.dental"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "261842988927-8rq49rcndvppsfgnqbg5uefqpjt4p0rd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZp8opmdQ2WJwkBh0UvqIO9yV_vsm6SWA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "261842988927-8rq49rcndvppsfgnqbg5uefqpjt4p0rd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/back"
+    android:orientation="vertical">
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:hint="@string/datehint"
+        android:padding="10dp"
+        android:textSize="18sp"
+        app:boxCornerRadiusBottomEnd="20dp"
+        app:boxCornerRadiusTopStart="20dp"
+        app:boxStrokeColor="@drawable/box_color"
+        app:boxStrokeErrorColor="#F2FFEF"
+        app:boxStrokeWidth="1dp"
+        app:boxStrokeWidthFocused="2dp">
+        <com.santalu.maskara.widget.MaskEditText
+            android:id="@+id/date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="date"
+            app:mask="__/__/____"
+            app:maskCharacter="_"
+            app:maskStyle="completable"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:hint="@string/placehint"
+        android:padding="10dp"
+        android:textSize="18sp"
+        app:boxCornerRadiusBottomEnd="20dp"
+        app:boxCornerRadiusTopStart="20dp"
+        app:boxStrokeColor="@drawable/box_color"
+        app:boxStrokeErrorColor="#F2FFEF"
+        app:boxStrokeWidth="1dp"
+        app:boxStrokeWidthFocused="2dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/place"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:hint="@string/doctorhint"
+        android:padding="10dp"
+        android:textSize="18sp"
+        app:boxCornerRadiusBottomEnd="20dp"
+        app:boxCornerRadiusTopStart="20dp"
+        app:boxStrokeColor="@drawable/box_color"
+        app:boxStrokeWidth="1dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/doctor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:hint="@string/commenthint"
+        app:boxCornerRadiusBottomEnd="20dp"
+        app:boxCornerRadiusTopStart="20dp"
+        android:padding="10dp"
+        app:boxStrokeColor="@drawable/box_color"
+        android:textSize="18sp"
+        app:counterEnabled="true"
+        app:counterMaxLength="100">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/comment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
+</LinearLayout>
