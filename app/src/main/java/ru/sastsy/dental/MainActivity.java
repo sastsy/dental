@@ -1,8 +1,10 @@
 package ru.sastsy.dental;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
@@ -42,10 +44,10 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView navView = findViewById(R.id.bottom_navigation);
         navView.setOnNavigationItemSelectedListener(navListener);
 
-        Map<String, Object> user = new HashMap<>();
-
         FirebaseAuth fAuth = FirebaseAuth.getInstance();
         FirebaseFirestore fStore = FirebaseFirestore.getInstance();
+
+        getSupportFragmentManager().beginTransaction().replace(R.id.navHostFragment, new StatsFragment()).commit();
 
         String userID = fAuth.getCurrentUser().getUid();
 
@@ -54,17 +56,34 @@ public class MainActivity extends AppCompatActivity {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
                 if (!document.exists()) {
+                    Map<String, Object> map = new HashMap<>();
                     for (int i = 0; i <= 31; ++i) {
                         toothList[i] = new Tooth(i + 1);
-                        user.put("name", toothList[i].name);
-                        user.put("number", toothList[i].number);
-                        user.put("state", toothList[i].state);
-                        user.put("event", toothList[i].event);
-                        collectionReference.document(String.valueOf(toothList[i].number)).set(user, SetOptions.merge());
+                        map.put("name", toothList[i].name);
+                        map.put("number", toothList[i].number);
+                        map.put("state", toothList[i].state);
+                        map.put("event", toothList[i].event);
+                        collectionReference.document(String.valueOf(toothList[i].number)).set(map, SetOptions.merge());
                     }
+                    map.clear();
+                    for (int i = 0; i < getResources().getStringArray(R.array.tooth_state).length; ++i) {
+                        map.put(String.valueOf(i), 0);
+                    }
+                    collectionReference.document("stats").set(map);
+                    Map<String, ArrayList<String>> map2 = new HashMap<>();
+                    map2.put("event", new ArrayList<>());
+                    collectionReference.document("events").set(map2);
                 }
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        androidx.fragment.app.Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.navHostFragment);
+        assert fragment != null;
+        fragment.onActivityResult(requestCode, resultCode, data);
     }
 
     private final BottomNavigationView.OnNavigationItemSelectedListener navListener = item -> {
@@ -80,7 +99,9 @@ public class MainActivity extends AppCompatActivity {
                 getSupportFragmentManager().beginTransaction().replace(R.id.navHostFragment, new CameraFragment()).commit();
                 break;
             case R.id.navigation_exit:
-                getSupportFragmentManager().beginTransaction().replace(R.id.navHostFragment, new ExitFragment()).commit();
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(getApplicationContext(), LoginActivity.class));
+                finish();
                 break;
         }
         return true;

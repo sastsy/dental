@@ -30,6 +30,7 @@
         <item name="editTextStyle">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox
         </item>
         <item name="buttonTint">@color/orange</item>
+        <item name="android:gravity">center_horizontal</item>
     </style>
 
     <style name="AlertDialogTitle">
@@ -57,8 +58,8 @@
     </style>
 
     <style name="ThemeOverlay.App.BottomNavigationView" parent="">
-        <item name="colorPrimary">#FF9088</item>
-        <item name="colorOnPrimary">#FFEEEB</item>
+        <item name="colorPrimary">#E0FFF8</item>
+        <item name="colorOnPrimary">#F44336</item>
     </style>
 
     <style name="Theme.Dental.NoActionBar">

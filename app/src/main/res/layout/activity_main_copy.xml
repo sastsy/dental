@@ -10,7 +10,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#1A00F3BA"
+        android:background="#1900F3BA"
         tools:context="com.example.dental.MainActivity">
 
         <ImageButton
@@ -489,7 +489,7 @@
             android:fontFamily="serif"
             android:text="Статистика"
             android:textSize="18sp"
-            app:backgroundTint="#FF9088"
+            app:backgroundTint="#80FFFFFF"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
@@ -524,6 +524,8 @@
             android:text="ОСОБЕННОСТИ"
             android:textColor="#FFFF5F53"
             android:textSize="12sp"
+            android:visibility="gone"
+            app:cornerRadius="50dp"
             app:icon="@android:drawable/ic_dialog_info"
             app:iconPadding="4dp"
             app:iconSize="20dp"
@@ -531,10 +533,8 @@
             app:layout_constraintEnd_toEndOf="@+id/textView"
             app:layout_constraintStart_toStartOf="@+id/textView"
             app:layout_constraintTop_toBottomOf="@+id/textView"
-            android:visibility="gone"
             app:strokeColor="#FFFF5F53"
-            app:strokeWidth="1dp"
-            app:cornerRadius="50dp"/>
+            app:strokeWidth="1dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

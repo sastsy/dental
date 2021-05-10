@@ -7,7 +7,7 @@ public class Tooth {
     public String name;
     public ArrayList<Long> state;
     public int number;
-    public ArrayList<Event> event;
+    public ArrayList<String> event;
 
     String[] name_list = {"Третий моляр (зуб мудрости)", "Второй моляр", "Первый моляр", "Второй премоляр",
     "Первый премоляр", "Клык", "Боковой резец", "Центральный резец"};
@@ -28,23 +28,23 @@ public class Tooth {
         this.event = new ArrayList<>();
     }
 
-    public void addEvent(Event event) {
+    public void addEvent(String event) {
         this.event.add(event);
     }
 
     public int getNumber() {
-        return number;
+        return this.number;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
-    public ArrayList<Event> getEvent() {
-        return event;
+    public ArrayList<String> getEvent() {
+        return this.event;
     }
 
     public ArrayList<Long> getState() {
-        return state;
+        return this.state;
     }
 }

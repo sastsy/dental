@@ -112,74 +112,71 @@ public class WhitenToothActivity extends AppCompatActivity {
                 Task<List<Face>> result =
                         detector.process(image)
                                 .addOnSuccessListener(
-                                        new OnSuccessListener<List<Face>>() {
-                                            @Override
-                                            public void onSuccess(List<Face> faces) {
+                                        faces -> {
 
-                                                for (Face face : faces) {
-                                                    Rect bounds = face.getBoundingBox();
-                                                    float rotY = face.getHeadEulerAngleY();  // Head is rotated to the right rotY degrees
-                                                    float rotZ = face.getHeadEulerAngleZ();  // Head is tilted sideways rotZ degrees
+                                            for (Face face : faces) {
+                                                Rect bounds = face.getBoundingBox();
+                                                float rotY = face.getHeadEulerAngleY();  // Head is rotated to the right rotY degrees
+                                                float rotZ = face.getHeadEulerAngleZ();  // Head is tilted sideways rotZ degrees
 
-                                                    Paint paint = new Paint();
-                                                    paint.setColor(Color.WHITE);
-                                                    paint.setStyle(Paint.Style.STROKE);
-                                                    canvas.drawRect(bounds, paint);
+                                                Paint paint = new Paint();
+                                                paint.setColor(Color.WHITE);
+                                                paint.setStyle(Paint.Style.STROKE);
+                                                canvas.drawRect(bounds, paint);
 
-                                                    // If landmark detection was enabled (mouth, ears, eyes, cheeks, and
-                                                    // nose available):
-                                                    FaceLandmark mouthLeft = face.getLandmark(FaceLandmark.MOUTH_LEFT);
-                                                    FaceLandmark mouthRight = face.getLandmark(FaceLandmark.MOUTH_RIGHT);
-                                                    FaceLandmark mouthBottom = face.getLandmark(FaceLandmark.MOUTH_BOTTOM);
-                                                    FaceLandmark noseBase = face.getLandmark(FaceLandmark.NOSE_BASE);
-                                                    /*if (mouthLeft != null && mouthBottom != null && mouthRight != null && noseBase != null) {
-                                                        float startX = mouthRight.getPosition().x;
-                                                        float endX = mouthLeft.getPosition().x;
-                                                        float startY = noseBase.getPosition().y;
-                                                        float endY = mouthBottom.getPosition().y;
-                                                    }*/
-                                                    int startX = (int) mouthLeft.getPosition().x;
-                                                    int endX = (int) mouthRight.getPosition().x;
-                                                    int startY = (int) noseBase.getPosition().y;
-                                                    int endY = (int) mouthBottom.getPosition().y;
-                                                    System.out.println(startX + " " + endX);
-                                                    System.out.println(startY + " " + endY);
+                                                // If landmark detection was enabled (mouth, ears, eyes, cheeks, and
+                                                // nose available):
+                                                FaceLandmark mouthLeft = face.getLandmark(FaceLandmark.MOUTH_LEFT);
+                                                FaceLandmark mouthRight = face.getLandmark(FaceLandmark.MOUTH_RIGHT);
+                                                FaceLandmark mouthBottom = face.getLandmark(FaceLandmark.MOUTH_BOTTOM);
+                                                FaceLandmark noseBase = face.getLandmark(FaceLandmark.NOSE_BASE);
+                                                /*if (mouthLeft != null && mouthBottom != null && mouthRight != null && noseBase != null) {
+                                                    float startX = mouthRight.getPosition().x;
+                                                    float endX = mouthLeft.getPosition().x;
+                                                    float startY = noseBase.getPosition().y;
+                                                    float endY = mouthBottom.getPosition().y;
+                                                }*/
+                                                int startX = (int) mouthLeft.getPosition().x;
+                                                int endX = (int) mouthRight.getPosition().x;
+                                                int startY = (int) noseBase.getPosition().y;
+                                                int endY = (int) mouthBottom.getPosition().y;
+                                                System.out.println(startX + " " + endX);
+                                                System.out.println(startY + " " + endY);
 
-                                                    List<PointF> mouth_upper_points = face.getContour(FaceContour.LOWER_LIP_TOP).getPoints();
-                                                    List<PointF> mouth_lower_points = face.getContour(FaceContour.UPPER_LIP_BOTTOM).getPoints();
-                                                    List<PointF> mouth_points = new ArrayList<PointF>();
-                                                    mouth_points.addAll(mouth_lower_points);
-                                                    mouth_points.addAll(mouth_upper_points);
+                                                List<PointF> mouth_upper_points = face.getContour(FaceContour.LOWER_LIP_TOP).getPoints();
+                                                List<PointF> mouth_lower_points = face.getContour(FaceContour.UPPER_LIP_BOTTOM).getPoints();
+                                                List<PointF> mouth_points = new ArrayList<PointF>();
+                                                mouth_points.addAll(mouth_lower_points);
+                                                mouth_points.addAll(mouth_upper_points);
 
-                                                    Path mouth_shape = new Path();
-                                                    mouth_shape.moveTo(mouth_points.get(0).x, mouth_points.get(0).y);
-                                                    for (PointF point: mouth_points) {
-                                                        mouth_shape.lineTo(point.x, point.y);
+                                                Path mouth_shape = new Path();
+                                                mouth_shape.moveTo(mouth_points.get(0).x, mouth_points.get(0).y);
+                                                for (PointF point: mouth_points) {
+                                                    mouth_shape.lineTo(point.x, point.y);
+                                                }
+                                                mouth_shape.lineTo(mouth_points.get(mouth_points.size() - 1).x, mouth_points.get(mouth_points.size() - 1).y);
+                                                mouth_shape.close();
+
+                                                Bitmap maskBitmap = getMaskBitmap(mutableBitmap, mouth_shape);
+
+                                                doBrightness(mutableBitmap, maskBitmap, 50, startX, endX, startY, endY);
+
+                                                // If classification was enabled:
+                                                if (face.getSmilingProbability() != null) {
+                                                    float smileProb = face.getSmilingProbability();
+                                                    float finalProb = smileProb * 100;
+                                                    mFinalProb = finalProb;
+                                                    String prob = "";
+                                                    if (smileProb != 0) {
+                                                        prob = String.valueOf(finalProb) + "%" + "Happy";
+                                                    } else {
+                                                        Toast.makeText(WhitenToothActivity.this, "Put up a smile :) ", Toast.LENGTH_SHORT).show();
                                                     }
-                                                    mouth_shape.lineTo(mouth_points.get(mouth_points.size() - 1).x, mouth_points.get(mouth_points.size() - 1).y);
-                                                    mouth_shape.close();
+                                                    imageView.setImageBitmap(mutableBitmap);
+                                                    details.setText(String.valueOf(finalProb) + "%" + "Happy");
 
-                                                    Bitmap maskBitmap = getMaskBitmap(mutableBitmap, mouth_shape);
+                                                    showAlertDialog();
 
-                                                    doBrightness(mutableBitmap, maskBitmap, 50, startX, endX, startY, endY);
-
-                                                    // If classification was enabled:
-                                                    if (face.getSmilingProbability() != null) {
-                                                        float smileProb = face.getSmilingProbability();
-                                                        float finalProb = smileProb * 100;
-                                                        mFinalProb = finalProb;
-                                                        String prob = "";
-                                                        if (smileProb != 0) {
-                                                            prob = String.valueOf(finalProb) + "%" + "Happy";
-                                                        } else {
-                                                            Toast.makeText(WhitenToothActivity.this, "Put up a smile :) ", Toast.LENGTH_SHORT).show();
-                                                        }
-                                                        imageView.setImageBitmap(mutableBitmap);
-                                                        details.setText(String.valueOf(finalProb) + "%" + "Happy");
-
-                                                        showAlertDialog();
-
-                                                    }
                                                 }
                                             }
                                         })

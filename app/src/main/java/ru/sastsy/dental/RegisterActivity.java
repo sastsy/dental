@@ -18,6 +18,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -31,7 +32,8 @@ public class RegisterActivity extends AppCompatActivity {
     public static final String TAG = "TAG";
     EditText mEmail, mPassword;
     Button mRegisterBtn;
-    TextView mLoginBtn;
+    TextView mLoginText;
+    CircularProgressIndicator progressBar;
     FirebaseAuth fAuth;
     FirebaseFirestore fStore;
     String userID;
@@ -42,9 +44,10 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         mEmail = findViewById(R.id.email);
-        mPassword = findViewById(R.id.passwrd);
+        mPassword = findViewById(R.id.password);
         mRegisterBtn = findViewById(R.id.signup);
-        mLoginBtn = findViewById(R.id.signin);
+        mLoginText = findViewById(R.id.login);
+        progressBar = findViewById(R.id.progress_circular_reg);
 
         fAuth = FirebaseAuth.getInstance();
         fStore = FirebaseFirestore.getInstance();
@@ -72,6 +75,8 @@ public class RegisterActivity extends AppCompatActivity {
                 mPassword.setError("Password Must be >= 6 Characters");
                 return;
             }
+
+            progressBar.setVisibility(View.VISIBLE);
 
             fAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
@@ -103,6 +108,10 @@ public class RegisterActivity extends AppCompatActivity {
                     }
                 }
             });
+        });
+
+        mLoginText.setOnClickListener(v -> {
+            startActivity(new Intent(getApplicationContext(), LoginActivity.class));
         });
 
     }

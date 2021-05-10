@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/back"
+    android:isScrollContainer="true"
     android:orientation="vertical">
 
     <com.google.android.material.textfield.TextInputLayout
@@ -22,6 +22,7 @@
         app:boxStrokeErrorColor="#F2FFEF"
         app:boxStrokeWidth="1dp"
         app:boxStrokeWidthFocused="2dp">
+
         <com.santalu.maskara.widget.MaskEditText
             android:id="@+id/date"
             android:layout_width="match_parent"
@@ -29,7 +30,7 @@
             android:inputType="date"
             app:mask="__/__/____"
             app:maskCharacter="_"
-            app:maskStyle="completable"/>
+            app:maskStyle="completable" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -78,11 +79,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:hint="@string/commenthint"
+        android:padding="10dp"
+        android:textSize="18sp"
         app:boxCornerRadiusBottomEnd="20dp"
         app:boxCornerRadiusTopStart="20dp"
-        android:padding="10dp"
         app:boxStrokeColor="@drawable/box_color"
-        android:textSize="18sp"
         app:counterEnabled="true"
         app:counterMaxLength="100">
 

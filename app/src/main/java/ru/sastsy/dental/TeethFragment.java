@@ -1,6 +1,7 @@
 package ru.sastsy.dental;
 
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,7 +59,6 @@ public class TeethFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
     }
 
     @Override
@@ -134,61 +134,68 @@ public class TeethFragment extends Fragment {
             });
         }
 
-        changeToothStateButton.setOnClickListener(v -> {
-
-            collectionReference.document(String.valueOf(toothList[clicked_tooth].number)).get().addOnCompleteListener(task -> {
-                DocumentSnapshot document = task.getResult();
-                toothList[clicked_tooth].state = (ArrayList<Long>) document.get("state");
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialog);
-                builder.setTitle(toothList[clicked_tooth].name.toUpperCase());
-
-                for (int i = 0; i < checkedState.length; ++i) {
-                    if (toothList[clicked_tooth].state.contains((long) i)) checkedState[i] = true;
-                    else checkedState[i] = false;
-                    // System.out.println(toothList[clicked_tooth].state);
-                    //System.out.println(toothList[clicked_tooth].state.get(0) == (long) 0);
-                }
-                builder.setMultiChoiceItems(toothStateList, checkedState, (dialog, which, isChecked) -> {
-                    if (isChecked) {
-                        if (!toothList[clicked_tooth].state.contains(which)) toothList[clicked_tooth].state.add((long) which);
-                    }
-                    else toothList[clicked_tooth].state.remove(Long.valueOf(which));
-                });
-                builder.setCancelable(false);
-                builder.setPositiveButton("СОХРАНИТЬ", (dialog, which) -> {
-                    collectionReference.document(String.valueOf(toothList[clicked_tooth].number)).update("state", toothList[clicked_tooth].state);
-                });
-                builder.setNegativeButton("ОТМЕНИТЬ", (dialog, which) -> {
-                    dialog.dismiss();
-                });
-                AlertDialog change_state_dialog = builder.create();
-                change_state_dialog.show();
-
-            });
-        });
-
-        addEventButton.setOnClickListener(v -> {
+        changeToothStateButton.setOnClickListener(v -> collectionReference.document(String.valueOf(toothList[clicked_tooth].number)).get()
+                .addOnCompleteListener(task -> {
+            DocumentSnapshot document = task.getResult();
+            toothList[clicked_tooth].state = (ArrayList<Long>) document.get("state");
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialog);
-            builder.setTitle(R.string.AlertDialogEvent);
-            View dialogView = getLayoutInflater().inflate(R.layout.event_dialog, null);
-            MaskEditText date = dialogView.findViewById(R.id.date);
-            EditText place = dialogView.findViewById(R.id.place);
-            TextInputEditText doctor = dialogView.findViewById(R.id.doctor);
-            TextInputEditText comment = dialogView.findViewById(R.id.comment);
+            builder.setTitle(toothList[clicked_tooth].name.toUpperCase());
 
+            for (int i = 0; i < checkedState.length; ++i) {
+                if (toothList[clicked_tooth].state.contains((long) i)) checkedState[i] = true;
+                else checkedState[i] = false;
+            }
+            builder.setMultiChoiceItems(toothStateList, checkedState, (dialog, which, isChecked) -> {
+                if (isChecked) {
+                    if (!toothList[clicked_tooth].state.contains(which)) toothList[clicked_tooth].state.add((long) which);
+                }
+                else toothList[clicked_tooth].state.remove(Long.valueOf(which));
+            });
             builder.setCancelable(false);
             builder.setPositiveButton("СОХРАНИТЬ", (dialog, which) -> {
-                Event event = new Event(date.getMasked(), place.getText().toString(), doctor.getText().toString(), comment.getText().toString());
-                toothList[clicked_tooth].addEvent(event);
+                collectionReference.document(String.valueOf(toothList[clicked_tooth].number)).update("state", toothList[clicked_tooth].state);
             });
             builder.setNegativeButton("ОТМЕНИТЬ", (dialog, which) -> {
                 dialog.dismiss();
             });
+            AlertDialog change_state_dialog = builder.create();
+            change_state_dialog.show();
 
-            AlertDialog addEventDialog = builder.create();
-            addEventDialog.setView(dialogView);
-            addEventDialog.show();
-        });
+        }));
+
+        addEventButton.setOnClickListener(v -> collectionReference.document(String.valueOf(toothList[clicked_tooth].number)).get()
+                .addOnCompleteListener(task -> {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialog);
+                    builder.setTitle(R.string.AlertDialogEvent);
+                    View dialogView = getLayoutInflater().inflate(R.layout.event_dialog, null);
+                    MaskEditText date = dialogView.findViewById(R.id.date);
+                    EditText place = dialogView.findViewById(R.id.place);
+                    TextInputEditText doctor = dialogView.findViewById(R.id.doctor);
+                    TextInputEditText comment = dialogView.findViewById(R.id.comment);
+                    builder.setCancelable(false);
+
+                    DocumentSnapshot document = task.getResult();
+                    toothList[clicked_tooth].event = (ArrayList<String>) document.get("event");
+
+                    StringBuilder history_string = new StringBuilder();
+                    builder.setPositiveButton("СОХРАНИТЬ", (dialog, which) -> {
+                        Event event = new Event(date.getMasked(), place.getText().toString(), doctor.getText().toString(), comment.getText().toString());
+                        if (!event.date.equals("")) history_string.append("<font color=\"#FF9088\">" + "ДАТА: " + "</font>").append(event.date);
+                        if (!event.place.equals("")) history_string.append("<br>").append("<font color=\"#FF9088\">" + "МЕСТО: " + "</font>").append(event.place);
+                        if (!event.doctor.equals("")) history_string.append("<br>").append("<font color=\"#FF9088\">" + "ДОКТОР: " + "</font>").append(event.doctor);
+                        if (!event.comment.equals("")) history_string.append("<br>").append("<font color=\"#FF9088\">" + "КОММЕНТАРИЙ: " + "</font>").append(event.comment);
+                        toothList[clicked_tooth].addEvent(history_string.toString());
+                        collectionReference.document(String.valueOf(toothList[clicked_tooth].number)).update("event", toothList[clicked_tooth].event);
+                        collectionReference.document("events").update("event", FieldValue.arrayUnion(history_string.toString()));
+                    });
+                    builder.setNegativeButton("ОТМЕНИТЬ", (dialog, which) -> {
+                        dialog.dismiss();
+                    });
+
+                    AlertDialog addEventDialog = builder.create();
+                    addEventDialog.setView(dialogView);
+                    addEventDialog.show();
+                }));
 
         toothSpecialitiesButton.setOnClickListener(v -> {
 
@@ -210,22 +217,27 @@ public class TeethFragment extends Fragment {
         });
 
         toothHistoryButton.setOnClickListener(v -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialog);
-            builder.setTitle("ИСТОРИЯ");
-            builder.setCancelable(true);
-            StringBuilder history_string = new StringBuilder();
-            ArrayList<Event> reversed = toothList[clicked_tooth].event;
-            Collections.reverse(reversed);
-            for (Event event : reversed) {
-                if (!event.date.equals("")) history_string.append(event.date);
-                if (!event.place.equals("")) history_string.append("\n").append(event.place);
-                if (!event.doctor.equals("")) history_string.append("\n").append(event.doctor);
-                if (!event.comment.equals("")) history_string.append("\n").append(event.comment);
-                history_string.append("\n").append("\n");
-            }
-            builder.setMessage(history_string);
-            AlertDialog showHistoryDialog = builder.create();
-            showHistoryDialog.show();
+            collectionReference.document(String.valueOf(toothList[clicked_tooth].number)).get()
+                    .addOnCompleteListener(task -> {
+                        DocumentSnapshot document = task.getResult();
+                        toothList[clicked_tooth].event = (ArrayList<String>) document.get("event");
+                        //System.out.println(document.toObject(Event.class).doctor);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialog);
+                        builder.setTitle("ИСТОРИЯ");
+                        builder.setCancelable(true);
+                        StringBuilder history_string = new StringBuilder();
+                        ArrayList<String> reversed = new ArrayList<>(toothList[clicked_tooth].event);
+                        Collections.reverse(reversed);
+                        for (String event : reversed) {
+                            history_string.append("<br><br>").append(event);
+                        }
+                        builder.setMessage(Html.fromHtml(history_string.toString()));
+                        builder.setNegativeButton("ЗАКРЫТЬ", (dialog, which) -> {
+                            dialog.dismiss();
+                        });
+                        AlertDialog showHistoryDialog = builder.create();
+                        showHistoryDialog.show();
+                    });
         });
 
     }

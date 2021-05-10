@@ -37,4 +37,6 @@
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="title_activity_password">PasswordActivity</string>
+    <string name="email">EMAIL</string>
+    <string name="password">ПАРОЛЬ</string>
 </resources>
