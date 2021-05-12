@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
@@ -168,7 +169,8 @@ public class CameraFragment extends Fragment {
                                                 }
 
 
-                                                    imageView.setImageBitmap(mutableBitmap);
+                                                //imageView.setImageBitmap(mutableBitmap);
+                                                showAlertDialog(mutableBitmap);
                                                     //details.setText(String.valueOf(finalProb) + "%" + "Happy");
                                             }
                                         })
@@ -246,5 +248,26 @@ public class CameraFragment extends Fragment {
                 }
             }
         }
+    }
+
+    private void showAlertDialog(Bitmap bitmap) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialog);
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View dialog = inflater.inflate(R.layout.dialog_face, null, false);
+        builder.setCancelable(false);
+
+        builder.setView(dialog).setTitle("ГОТОВОЕ ИЗОБРАЖЕНИЕ");
+
+        ImageView smilingFace = dialog.findViewById(R.id.image_face);
+        smilingFace.setImageBitmap(bitmap);
+        builder.setPositiveButton("ЗАГРУЗИТЬ", (alertDialog, which) -> {
+
+        });
+        builder.setNegativeButton("ОТМЕНИТЬ", (alertDialog, which) -> {
+            alertDialog.dismiss();
+        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 }

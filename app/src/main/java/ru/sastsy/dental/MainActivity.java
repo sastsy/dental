@@ -47,7 +47,8 @@ public class MainActivity extends AppCompatActivity {
         FirebaseAuth fAuth = FirebaseAuth.getInstance();
         FirebaseFirestore fStore = FirebaseFirestore.getInstance();
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.navHostFragment, new StatsFragment()).commit();
+        navView.setSelectedItemId(R.id.navigation_teeth);
+        getSupportFragmentManager().beginTransaction().replace(R.id.navHostFragment, new TeethFragment()).commit();
 
         String userID = fAuth.getCurrentUser().getUid();
 

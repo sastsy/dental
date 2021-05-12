@@ -45,7 +45,7 @@ public class LoginActivity extends AppCompatActivity {
         mCreateBtn = findViewById(R.id.createText);
         forgotTextLink = findViewById(R.id.forgotPassword);
 
-        if (fAuth.getCurrentUser() != null) {
+        if (fAuth.getCurrentUser() != null && fAuth.getCurrentUser().isEmailVerified()) {
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
             finish();
         }
@@ -55,18 +55,25 @@ public class LoginActivity extends AppCompatActivity {
             String email = mEmail.getText().toString().trim();
             String password = mPassword.getText().toString().trim();
 
-            if(TextUtils.isEmpty(email)){
+            if (TextUtils.isEmpty(email)){
                 mEmail.setError("Требуется email");
                 return;
             }
 
-            if(TextUtils.isEmpty(password)){
+            if (TextUtils.isEmpty(password)){
                 mPassword.setError("Требуется пароль");
                 return;
             }
 
-            if(password.length() < 6){
+            if (password.length() < 6){
                 mPassword.setError("Пароль должен быть не менее 6 символов");
+                return;
+            }
+
+            fAuth.getCurrentUser().reload();
+
+            if (!fAuth.getCurrentUser().isEmailVerified()) {
+                Toast.makeText(LoginActivity.this, "Email не подтвержден!", Toast.LENGTH_SHORT).show();
                 return;
             }
 
