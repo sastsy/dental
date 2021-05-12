@@ -10,11 +10,14 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +28,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.face.Face;
 import com.google.mlkit.vision.face.FaceContour;
@@ -34,6 +38,9 @@ import com.google.mlkit.vision.face.FaceDetectorOptions;
 import com.google.mlkit.vision.face.FaceLandmark;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,9 +53,10 @@ public class CameraFragment extends Fragment {
 
     ImageView imageView;
     TextView details;
-    Button gallery, camera;
+    ImageButton gallery, camera;
     File mImageFile;
-    float mFinalProb;
+    RadioButton radioButton1, radioButton2, radioButton3;
+    CircularProgressIndicator progressBar;
 
     public CameraFragment() {
         // Required empty public constructor
@@ -75,6 +83,11 @@ public class CameraFragment extends Fragment {
         imageView = view.findViewById(R.id.imageView);
         gallery = view.findViewById(R.id.gallery);
         camera = view.findViewById(R.id.camera);
+        radioButton1 = view.findViewById(R.id.radioButton1);
+        radioButton2 = view.findViewById(R.id.radioButton2);
+        radioButton3 = view.findViewById(R.id.radioButton3);
+        progressBar = view.findViewById(R.id.progress_circular_camera);
+        radioButton2.setChecked(true);
         return view;
     }
 
@@ -102,8 +115,6 @@ public class CameraFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        Toast.makeText(getContext(), "YESSSSSSS", Toast.LENGTH_SHORT).show();
 
         EasyImage.handleActivityResult(requestCode, resultCode, data, getActivity(), new DefaultCallback() {
             @Override
@@ -165,12 +176,18 @@ public class CameraFragment extends Fragment {
                                                     int startY = (int) noseBase.getPosition().y;
                                                     int endY = (int) mouthBottom.getPosition().y;
 
-                                                    doBrightness(mutableBitmap, maskBitmap, 50, startX, endX, startY, endY);
+                                                    int brightness;
+                                                    if (radioButton1.isChecked()) brightness = 30;
+                                                    else if (radioButton2.isChecked()) brightness = 60;
+                                                    else brightness = 80;
+                                                    doBrightness(mutableBitmap, maskBitmap, brightness, startX, endX, startY, endY);
+                                                    progressBar.setVisibility(View.VISIBLE);
                                                 }
 
 
                                                 //imageView.setImageBitmap(mutableBitmap);
                                                 showAlertDialog(mutableBitmap);
+                                                progressBar.setVisibility(View.INVISIBLE);
                                                     //details.setText(String.valueOf(finalProb) + "%" + "Happy");
                                             }
                                         })
@@ -256,14 +273,31 @@ public class CameraFragment extends Fragment {
         View dialog = inflater.inflate(R.layout.dialog_face, null, false);
         builder.setCancelable(false);
 
-        builder.setView(dialog).setTitle("ГОТОВОЕ ИЗОБРАЖЕНИЕ");
+        builder.setView(dialog).setTitle("ГОТОВО!");
 
         ImageView smilingFace = dialog.findViewById(R.id.image_face);
         smilingFace.setImageBitmap(bitmap);
         builder.setPositiveButton("ЗАГРУЗИТЬ", (alertDialog, which) -> {
+            FileOutputStream outputStream = null;
+            File sdCard = Environment.getExternalStorageDirectory();
+            File dir = new File(sdCard.getAbsolutePath() + "/Pictures");
+            dir.mkdir();
+            String filename = String.format("%d.jpg", System.currentTimeMillis());
+            File outFile = new File(dir, filename);
+            try {
+                outputStream = new FileOutputStream(outFile);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                outputStream.flush();
+                outputStream.close();
 
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Toast.makeText(getContext(), "Изображение сохранено!", Toast.LENGTH_SHORT).show();
         });
-        builder.setNegativeButton("ОТМЕНИТЬ", (alertDialog, which) -> {
+        builder.setNegativeButton("ЗАКРЫТЬ", (alertDialog, which) -> {
             alertDialog.dismiss();
         });
 

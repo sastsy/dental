@@ -57,8 +57,8 @@ public class WhitenToothActivity extends AppCompatActivity {
 
         imageView = findViewById(R.id.imageView);
 
-        gallery = findViewById(R.id.gallery);
-        camera = findViewById(R.id.camera);
+        /*gallery = findViewById(R.id.gallery);
+        camera = findViewById(R.id.camera);*/
 
         camera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -206,10 +206,8 @@ public class WhitenToothActivity extends AppCompatActivity {
                 .setTitle("Be happy :)");
 
         ImageView smilingFace = dialog.findViewById(R.id.image_face);
-        TextView smileCoefficient = dialog.findViewById(R.id.happiness_text);
 
         smilingFace.setImageBitmap(new BitmapFactory().decodeFile(mImageFile.getAbsolutePath()));
-        smileCoefficient.setText(" " + String.valueOf(mFinalProb) + "%" + " happy!");
 
         AlertDialog alertDialog = builder.create();
         alertDialog.show();

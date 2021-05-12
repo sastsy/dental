@@ -73,9 +73,7 @@ public class StatsFragment extends Fragment {
             ArrayList<String> eventList = (ArrayList<String>) document.get("event");
             ArrayList<String> reversed = new ArrayList<>(eventList);
             Collections.reverse(reversed);
-
-            System.out.println(eventList);
-
+            //if (eventList.isEmpty()) textView.setText();
             for (String event : reversed) {
                 /*textView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -88,7 +86,6 @@ public class StatsFragment extends Fragment {
                 textView.append("\n");
                 textView.append(Html.fromHtml(event));
                 textView.append("\n");
-                System.out.println("Set!!!!");
             }
         });
 

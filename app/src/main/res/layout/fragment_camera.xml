@@ -102,6 +102,7 @@
         app:layout_constraintStart_toEndOf="@+id/imageView" />
 
     <RadioGroup
+        android:id="@+id/radioGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:addStatesFromChildren="false"
@@ -116,7 +117,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textView5">
 
         <RadioButton
-            android:id="@+id/radioButton"
+            android:id="@+id/radioButton1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="20dp"
@@ -142,5 +143,18 @@
             android:text="high"
             app:buttonTint="#D53333" />
     </RadioGroup>
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progress_circular_camera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="invisible"
+        app:indicatorColor="#FF7A7A"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
