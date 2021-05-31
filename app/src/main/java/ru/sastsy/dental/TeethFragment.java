@@ -1,5 +1,11 @@
 package ru.sastsy.dental;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapRegionDecoder;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.media.Image;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
@@ -14,6 +20,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import ru.sastsy.dental.R;
@@ -38,13 +45,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.inject.Scope;
 
 
 public class TeethFragment extends Fragment {
 
-    private int clicked_tooth = 0;
+    private int clicked_tooth = 15;
     private Tooth[] toothList = new Tooth[32];
     private ImageButton[] imageButtonsList = new ImageButton[32];
     private String[] toothStateList;
@@ -76,7 +84,7 @@ public class TeethFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        final String TAG = "TAG";
+        //final String TAG = "TAG";
 
         TextView textView = getActivity().findViewById(R.id.textView);
         Button changeToothStateButton = getActivity().findViewById(R.id.change_btn);
@@ -102,30 +110,23 @@ public class TeethFragment extends Fragment {
                 R.id.imageButton25, R.id.imageButton26, R.id.imageButton27, R.id.imageButton28, R.id.imageButton29,
                 R.id.imageButton30, R.id.imageButton31, R.id.imageButton32};
 
-        int[] redImages_id = {R.drawable.red1, R.drawable.red2, R.drawable.red3, R.drawable.red4, R.drawable.red5,
-                R.drawable.red6, R.drawable.red7, R.drawable.red8, R.drawable.red9, R.drawable.red10,
-                R.drawable.red11, R.drawable.red12, R.drawable.red13, R.drawable.red14, R.drawable.red15,
-                R.drawable.red16, R.drawable.red17, R.drawable.red18, R.drawable.red19, R.drawable.red20,
-                R.drawable.red21, R.drawable.red22, R.drawable.red23, R.drawable.red24, R.drawable.red25,
-                R.drawable.red26, R.drawable.red27, R.drawable.red28, R.drawable.red29, R.drawable.red30,
-                R.drawable.red31, R.drawable.red32};
-
-        int[] whiteImages_id = {R.drawable.white1, R.drawable.white2, R.drawable.white3, R.drawable.white4,
-                R.drawable.white5, R.drawable.white6, R.drawable.white7, R.drawable.white8, R.drawable.white9,
-                R.drawable.white10, R.drawable.white11, R.drawable.white12, R.drawable.white13, R.drawable.white14,
-                R.drawable.white15, R.drawable.white16, R.drawable.white17, R.drawable.white18, R.drawable.white19,
-                R.drawable.white20, R.drawable.white21, R.drawable.white22, R.drawable.white23, R.drawable.white24,
-                R.drawable.white25, R.drawable.white26, R.drawable.white27, R.drawable.white28, R.drawable.white29,
-                R.drawable.white30, R.drawable.white31, R.drawable.white32};
-
         for (int i = 0; i <= 31; ++i) {
             imageButtonsList[i] = getActivity().findViewById(imageButtons_id[i]);
             toothList[i] = new Tooth(i + 1);
             int finalI = i;
+            collectionReference.document(String.valueOf(toothList[i].number)).get().addOnCompleteListener(task -> {
+                DocumentSnapshot document = task.getResult();
+                toothList[finalI].state = (ArrayList<Long>) document.get("state");
+                if (toothList[finalI].state.contains((long)3)) imageButtonsList[finalI].setColorFilter(Color.parseColor("#BAFFFFFF"), PorterDuff.Mode.SRC_ATOP);
+                else if (toothList[finalI].state.contains((long)0)) imageButtonsList[finalI].setColorFilter(Color.parseColor("#65FF0000"), PorterDuff.Mode.SRC_ATOP);
+            });
             imageButtonsList[i].setOnClickListener(v -> {
-                imageButtonsList[clicked_tooth].setImageResource(whiteImages_id[clicked_tooth]);
+                //imageButtonsList[clicked_tooth].clearColorFilter();
+                if (toothList[clicked_tooth].state.contains((long)3)) imageButtonsList[clicked_tooth].setColorFilter(Color.parseColor("#BAFFFFFF"), PorterDuff.Mode.SRC_ATOP);
+                else if (toothList[clicked_tooth].state.contains((long)0)) imageButtonsList[clicked_tooth].setColorFilter(Color.parseColor("#65FF0000"), PorterDuff.Mode.SRC_ATOP);
+                else imageButtonsList[clicked_tooth].clearColorFilter();
                 clicked_tooth = finalI;
-                imageButtonsList[finalI].setImageResource(redImages_id[finalI]);
+                imageButtonsList[finalI].setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
                 textView.setText(toothList[finalI].name);
                 toothSpecialitiesButton.setVisibility(View.VISIBLE);
                 changeToothStateButton.setVisibility(View.VISIBLE);
@@ -154,6 +155,9 @@ public class TeethFragment extends Fragment {
             builder.setCancelable(false);
             builder.setPositiveButton("СОХРАНИТЬ", (dialog, which) -> {
                 collectionReference.document(String.valueOf(toothList[clicked_tooth].number)).update("state", toothList[clicked_tooth].state);
+                if (toothList[clicked_tooth].state.contains((long) 3)) imageButtonsList[clicked_tooth].setColorFilter(Color.parseColor("#BAFFFFFF"), PorterDuff.Mode.SRC_ATOP);
+                else if (toothList[clicked_tooth].state.contains((long) 0)) imageButtonsList[clicked_tooth].setColorFilter(Color.parseColor("#65FF0000"), PorterDuff.Mode.SRC_ATOP);
+                else imageButtonsList[clicked_tooth].clearColorFilter();
             });
             builder.setNegativeButton("ОТМЕНИТЬ", (dialog, which) -> {
                 dialog.dismiss();

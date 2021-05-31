@@ -70,9 +70,7 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            fAuth.getCurrentUser().reload();
-
-            if (!fAuth.getCurrentUser().isEmailVerified()) {
+            if (fAuth.getCurrentUser() != null && !fAuth.getCurrentUser().isEmailVerified()) {
                 Toast.makeText(LoginActivity.this, "Email не подтвержден!", Toast.LENGTH_SHORT).show();
                 return;
             }

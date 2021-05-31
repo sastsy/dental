@@ -62,69 +62,58 @@ public class RegisterActivity extends AppCompatActivity {
             String password = mPassword.getText().toString().trim();
 
             if (TextUtils.isEmpty(email)) {
-                mEmail.setError("Email is Required.");
+                mEmail.setError("Необходим Email");
                 return;
             }
 
             if (TextUtils.isEmpty(password)) {
-                mPassword.setError("Password is Required.");
+                mPassword.setError("Необходим пароль");
                 return;
             }
 
             if (password.length() < 6) {
-                mPassword.setError("Password Must be >= 6 Characters");
+                mPassword.setError("Пароль должен быть >= 6 символов");
                 return;
             }
 
             progressBar.setVisibility(View.VISIBLE);
 
-            fAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful()) {
-                        FirebaseUser fuser = fAuth.getCurrentUser();
+            fAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
 
-                        fuser.sendEmailVerification().addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Toast.makeText(RegisterActivity.this, "Письмо отправлено вам на почту!", Toast.LENGTH_SHORT).show();
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.d(TAG, "onFailure: Email not sent " + e.getMessage());
-                            }
-                        });
+                if (task.isSuccessful()) {
+                    FirebaseUser fuser = fAuth.getCurrentUser();
 
-                        Toast.makeText(RegisterActivity.this, "Аккаунт создан", Toast.LENGTH_SHORT).show();
-                        userID = fAuth.getCurrentUser().getUid();
-                        DocumentReference documentReference = fStore.collection("users").document(userID);
-                        Map<String, Object> user = new HashMap<>();
-                        user.put("email", email);
-                        documentReference.set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Log.d(TAG, "onSuccess: user Profile is created for "+ userID);
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.d(TAG, "onFailure: " + e.toString());
-                            }
-                        });
-                        startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                    fuser.sendEmailVerification().addOnSuccessListener(aVoid -> Toast.makeText(RegisterActivity.this,
+                            "Письмо отправлено вам на почту!", Toast.LENGTH_SHORT).show())
+                            .addOnFailureListener(e -> Log.d(TAG, "onFailure: Email not sent " + e.getMessage()));
 
-                    }
-                    else {
-                        Toast.makeText(RegisterActivity.this, "Ошибка!" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                    }
+                    Toast.makeText(RegisterActivity.this, "Аккаунт создан", Toast.LENGTH_SHORT).show();
+
+                    userID = fAuth.getCurrentUser().getUid();
+                    DocumentReference documentReference = fStore.collection("users").document(userID);
+                    Map<String, Object> user = new HashMap<>();
+                    user.put("email", email);
+
+                    documentReference.set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d(TAG, "onSuccess: user Profile is created for "+ userID);
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d(TAG, "onFailure: " + e.toString());
+                        }
+                    });
+
+                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                } else {
+                    Toast.makeText(RegisterActivity.this, "Ошибка!" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
         });
 
-        mLoginText.setOnClickListener(v -> {
-            startActivity(new Intent(getApplicationContext(), LoginActivity.class));
-        });
+        mLoginText.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), LoginActivity.class)));
 
     }
 

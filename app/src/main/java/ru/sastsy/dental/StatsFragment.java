@@ -2,32 +2,27 @@ package ru.sastsy.dental;
 
 import android.os.Bundle;
 import android.text.Html;
-import android.view.Gravity;
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class StatsFragment extends Fragment {
 
-    TextView textView;
+    TextView textViewEvents, statView;
 
 
     public StatsFragment() {
@@ -51,7 +46,10 @@ public class StatsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_stats, container, false);
-        textView = view.findViewById(R.id.textViewOfEvents);
+        textViewEvents = view.findViewById(R.id.textViewOfEvents);
+        statView = view.findViewById(R.id.textViewOfStats);
+        textViewEvents.setMovementMethod(new ScrollingMovementMethod());
+        statView.setMovementMethod(new ScrollingMovementMethod());
         return view;
     }
 
@@ -83,16 +81,16 @@ public class StatsFragment extends Fragment {
                 textView.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.textview_rect));
                 textView.setPadding(10, 20, 10, 0);
                 linearLayout.addView(textView);*/
-                textView.append("\n");
-                textView.append(Html.fromHtml(event));
-                textView.append("\n");
+                textViewEvents.append("\n");
+                textViewEvents.append(Html.fromHtml(event));
+                textViewEvents.append("\n");
             }
         });
 
 
         /*for (int i = 0; i < toothStateList.length; ++i) {
             collectionReference.document("stats").update(String.valueOf(i), 0);
-            for (int j = 0; j < 32; ++j) {
+            for (int j = 1; j <= 32; ++j) {
                 int finalI = i;
                 collectionReference.document(String.valueOf(j)).get().addOnCompleteListener(task -> {
                     DocumentSnapshot document = task.getResult();
@@ -101,5 +99,30 @@ public class StatsFragment extends Fragment {
                 });
             }
         }*/
+        //long[] numericList = new long[15];
+        ArrayList<Long> numericList = new ArrayList<>(Arrays.asList(new Long[15]));
+        Collections.fill(numericList, (long) 0);
+        for (int i = 1; i <= 32; ++i) {
+            collectionReference.document(String.valueOf(i)).get().addOnCompleteListener(task -> {
+                DocumentSnapshot document = task.getResult();
+                ArrayList<Long> stateList = (ArrayList<Long>) document.get("state");
+                //System.out.println(stateList);
+                for (int j = 0; j < toothStateList.length; ++j) {
+                    if (stateList.contains((long) j)) numericList.set(j, numericList.get(j) + 1);
+                }
+                collectionReference.document("stats").update("statistics", numericList);
+            });
+        }
+
+        //System.out.println(Arrays.toString(numericList));
+
+        collectionReference.document("stats").get().addOnCompleteListener(task -> {
+            DocumentSnapshot document = task.getResult();
+            ArrayList<Long> stateList = (ArrayList<Long>) document.get("statistics");
+            for (int i = 0; i <= toothStateList.length; ++i) {
+                if (stateList.get(i) != (long) 0) statView.append(Html.fromHtml("<br>" + "<font color=\"#FF9088\">" + toothStateList[i] + ": " + "</font>" + stateList.get(i) + "<br>"));
+                //System.out.println(Arrays.toString(numericList));
+            }
+        });
     }
 }

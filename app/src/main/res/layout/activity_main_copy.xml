@@ -489,7 +489,7 @@
             android:fontFamily="serif"
             android:text="Статистика"
             android:textSize="18sp"
-            app:backgroundTint="#80FFFFFF"
+            app:backgroundTint="#BAFFFFFF"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"

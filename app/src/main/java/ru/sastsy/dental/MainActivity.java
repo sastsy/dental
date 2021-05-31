@@ -29,13 +29,7 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    private int clicked_tooth = 0;
     private Tooth[] toothList = new Tooth[32];
-    private ImageButton[] imageButtonsList = new ImageButton[33];
-    private String[] toothStateList;
-    private boolean[] checkedState;
-    private ArrayList<Integer> copylistOfState = new ArrayList<>();
-    private Event[] eventsList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,22 +82,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private final BottomNavigationView.OnNavigationItemSelectedListener navListener = item -> {
-        Fragment selectedFragment = null;
-        switch(item.getItemId()) {
-            case R.id.navigation_teeth:
-                getSupportFragmentManager().beginTransaction().replace(R.id.navHostFragment, new TeethFragment()).commit();
-                break;
-            case R.id.navigation_stats:
-                getSupportFragmentManager().beginTransaction().replace(R.id.navHostFragment, new StatsFragment()).commit();
-                break;
-            case R.id.navigation_camera:
-                getSupportFragmentManager().beginTransaction().replace(R.id.navHostFragment, new CameraFragment()).commit();
-                break;
-            case R.id.navigation_exit:
-                FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(getApplicationContext(), LoginActivity.class));
-                finish();
-                break;
+        int id = item.getItemId();
+        if (id == R.id.navigation_teeth) getSupportFragmentManager().beginTransaction().replace(R.id.navHostFragment, new TeethFragment()).commit();
+        else if (id == R.id.navigation_stats) getSupportFragmentManager().beginTransaction().replace(R.id.navHostFragment, new StatsFragment()).commit();
+        else if (id == R.id.navigation_camera) getSupportFragmentManager().beginTransaction().replace(R.id.navHostFragment, new CameraFragment()).commit();
+        else if (id == R.id.navigation_exit) {
+            FirebaseAuth.getInstance().signOut();
+            startActivity(new Intent(getApplicationContext(), LoginActivity.class));
+            finish();
         }
         return true;
     };

@@ -9,4 +9,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="back">#FFCCFDFF</color>
     <color name="orange">#FF7C73</color>
+    <!--color name="bad_tooth">#65FF0000</color>
+    <color name="gone_tooth">#E6FFFFFF</color!-->
 </resources>
