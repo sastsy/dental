@@ -8,13 +8,11 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RadioButton;
@@ -23,11 +21,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.face.Face;
@@ -46,7 +42,6 @@ import java.util.List;
 
 import pl.aprilapps.easyphotopicker.DefaultCallback;
 import pl.aprilapps.easyphotopicker.EasyImage;
-import ru.sastsy.dental.R;
 
 
 public class CameraFragment extends Fragment {
@@ -208,8 +203,8 @@ public class CameraFragment extends Fragment {
         });
     }
 
-    private Bitmap getMaskBitmap(Bitmap givenBitmap, Path path) {
-        Bitmap maskBitmap = givenBitmap.copy(Bitmap.Config.ARGB_8888, true);
+    private Bitmap getMaskBitmap(Bitmap bitmap, Path path) {
+        Bitmap maskBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
         paint.setColor(Color.GREEN);
@@ -219,8 +214,6 @@ public class CameraFragment extends Fragment {
     }
 
     public static void doBrightness(Bitmap src, Bitmap mask, int value, int startX, int endX, int startY, int endY) {
-
-        //Bitmap bmOut = Bitmap.createBitmap(width, height, src.getConfig());
         // color information
         int A, R, G, B;
         int pixel;
@@ -274,9 +267,9 @@ public class CameraFragment extends Fragment {
         builder.setCancelable(false);
 
         builder.setView(dialog).setTitle("ГОТОВО!");
-
         ImageView smilingFace = dialog.findViewById(R.id.image_face);
         smilingFace.setImageBitmap(bitmap);
+
         builder.setPositiveButton("ЗАГРУЗИТЬ", (alertDialog, which) -> {
             FileOutputStream outputStream = null;
             File sdCard = Environment.getExternalStorageDirectory();
@@ -297,6 +290,7 @@ public class CameraFragment extends Fragment {
             }
             Toast.makeText(getContext(), "Изображение сохранено!", Toast.LENGTH_SHORT).show();
         });
+
         builder.setNegativeButton("ЗАКРЫТЬ", (alertDialog, which) -> {
             alertDialog.dismiss();
         });

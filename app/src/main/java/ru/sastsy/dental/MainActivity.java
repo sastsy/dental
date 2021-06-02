@@ -29,7 +29,7 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Tooth[] toothList = new Tooth[32];
+    private final Tooth[] toothList = new Tooth[32];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,21 +50,23 @@ public class MainActivity extends AppCompatActivity {
         collectionReference.document("1").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
-                if (!document.exists()) {
+                if (document.exists()) {
                     Map<String, Object> map = new HashMap<>();
                     for (int i = 0; i <= 31; ++i) {
                         toothList[i] = new Tooth(i + 1);
-                        map.put("name", toothList[i].name);
-                        map.put("number", toothList[i].number);
-                        map.put("state", toothList[i].state);
-                        map.put("event", toothList[i].event);
-                        collectionReference.document(String.valueOf(toothList[i].number)).set(map, SetOptions.merge());
+                        map.put("name", toothList[i].getName());
+                        map.put("number", toothList[i].getNumber());
+                        map.put("state", toothList[i].getState());
+                        map.put("event", toothList[i].getEvent());
+                        collectionReference.document(String.valueOf(toothList[i].getNumber())).set(map, SetOptions.merge());
                     }
                     map.clear();
+
                     for (int i = 0; i < getResources().getStringArray(R.array.tooth_state).length; ++i) {
                         map.put(String.valueOf(i), 0);
                     }
                     collectionReference.document("stats").set(map);
+
                     Map<String, ArrayList<String>> map2 = new HashMap<>();
                     map2.put("event", new ArrayList<>());
                     collectionReference.document("events").set(map2);
