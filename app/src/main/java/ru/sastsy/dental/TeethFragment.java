@@ -33,6 +33,7 @@ public class TeethFragment extends Fragment {
     private static final int TEETH_NUMBER = 32;
     private static final long REMOVED_TOOTH = 3;
     private static final long CAVITY_TOOTH = 0;
+    private static final long FILLED_TOOTH = 1;
 
     public TeethFragment() {
         // Required empty public constructor
@@ -73,7 +74,7 @@ public class TeethFragment extends Fragment {
         Jaw jaw = new Jaw(userID);
 
         String[] toothStateList = getResources().getStringArray(R.array.tooth_state); // List with all possible options for tooth status
-        boolean[] checkedState = new boolean[toothStateList.length]; // List to indicate which options the user chose from the list
+        boolean[] checkedState = new boolean[toothStateList.length]; // List to indicate which status options the user chose from the list
 
         int[] imageButtons_id = {R.id.imageButton1, R.id.imageButton2, R.id.imageButton3, R.id.imageButton4,
                 R.id.imageButton5, R.id.imageButton6, R.id.imageButton7, R.id.imageButton8, R.id.imageButton9,
@@ -97,6 +98,8 @@ public class TeethFragment extends Fragment {
                     imageButtonsList[finalI].setColorFilter(Color.parseColor("#BAFFFFFF"), PorterDuff.Mode.SRC_ATOP);
                 else if (jaw.getTooth(finalI).getState().contains(CAVITY_TOOTH))
                     imageButtonsList[finalI].setColorFilter(Color.parseColor("#65FF0000"), PorterDuff.Mode.SRC_ATOP);
+                else if (jaw.getTooth(finalI).getState().contains(FILLED_TOOTH))
+                    imageButtonsList[finalI].setColorFilter(Color.parseColor("#6500FFCC"), PorterDuff.Mode.SRC_ATOP);
             });
 
             imageButtonsList[i].setOnClickListener(v -> {
@@ -104,6 +107,8 @@ public class TeethFragment extends Fragment {
                     imageButtonsList[clicked_tooth].setColorFilter(Color.parseColor("#BAFFFFFF"), PorterDuff.Mode.SRC_ATOP);
                 else if (jaw.getTooth(clicked_tooth).getState().contains(CAVITY_TOOTH))
                     imageButtonsList[clicked_tooth].setColorFilter(Color.parseColor("#65FF0000"), PorterDuff.Mode.SRC_ATOP);
+                else if (jaw.getTooth(clicked_tooth).getState().contains(FILLED_TOOTH))
+                    imageButtonsList[clicked_tooth].setColorFilter(Color.parseColor("#6500FFCC"), PorterDuff.Mode.SRC_ATOP);
                 else imageButtonsList[clicked_tooth].clearColorFilter();
 
                 clicked_tooth = finalI;

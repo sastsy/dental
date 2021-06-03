@@ -1,5 +1,6 @@
 package ru.sastsy.dental;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,20 +11,19 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RadioButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.face.Face;
@@ -47,7 +47,6 @@ import pl.aprilapps.easyphotopicker.EasyImage;
 public class CameraFragment extends Fragment {
 
     ImageView imageView;
-    TextView details;
     ImageButton gallery, camera;
     File mImageFile;
     RadioButton radioButton1, radioButton2, radioButton3;
@@ -55,14 +54,6 @@ public class CameraFragment extends Fragment {
 
     public CameraFragment() {
         // Required empty public constructor
-    }
-
-
-    public static CameraFragment newInstance(String param1, String param2) {
-        CameraFragment fragment = new CameraFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
@@ -90,20 +81,14 @@ public class CameraFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        camera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //Opens camera dialog
-                EasyImage.openCameraForImage(getActivity(), 100);
-            }
+        camera.setOnClickListener(view -> {
+            //Opens camera dialog
+            EasyImage.openCameraForImage(getActivity(), 100);
         });
 
-        gallery.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //Opens gallery picker
-                EasyImage.openGallery(getActivity(), 100);
-            }
+        gallery.setOnClickListener(view -> {
+            //Opens gallery picker
+            EasyImage.openGallery(getActivity(), 100);
         });
     }
 
@@ -114,7 +99,7 @@ public class CameraFragment extends Fragment {
         EasyImage.handleActivityResult(requestCode, resultCode, data, getActivity(), new DefaultCallback() {
             @Override
             public void onImagePickerError(Exception e, EasyImage.ImageSource source, int type) {
-                Toast.makeText(getContext(), "Image picker error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Ошибка при выборе изображения", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -122,10 +107,12 @@ public class CameraFragment extends Fragment {
 
                 mImageFile = imageFiles.get(0);
 
+                // Convert chosen image into Bitmap to process it
                 Bitmap bitmap = new BitmapFactory().decodeFile(imageFiles.get(0).getAbsolutePath());
                 InputImage image = InputImage.fromBitmap(bitmap, 0);
                 Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
                 Canvas canvas = new Canvas(mutableBitmap);
+                // Set options for FaceDetector
                 FaceDetectorOptions options =
                         new FaceDetectorOptions.Builder()
                                 .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
@@ -138,71 +125,60 @@ public class CameraFragment extends Fragment {
 
                 FaceDetector detector = FaceDetection.getClient(options);
 
+
                 detector.process(image)
                                 .addOnSuccessListener(
                                         faces -> {
-
+                                            // Loop through all detected faces
                                             for (Face face : faces) {
-                                                // If landmark detection was enabled (mouth, ears, eyes, cheeks, and
-                                                // nose available):
+                                                // Get landmarks of mouth area
                                                 FaceLandmark mouthLeft = face.getLandmark(FaceLandmark.MOUTH_LEFT);
                                                 FaceLandmark mouthRight = face.getLandmark(FaceLandmark.MOUTH_RIGHT);
                                                 FaceLandmark mouthBottom = face.getLandmark(FaceLandmark.MOUTH_BOTTOM);
                                                 FaceLandmark noseBase = face.getLandmark(FaceLandmark.NOSE_BASE);
 
-                                                if (face.getContour(FaceContour.LOWER_LIP_TOP) != null && face.getContour(FaceContour.UPPER_LIP_BOTTOM) != null) {
+                                                // Checking if lips are present in the picture
+                                                if (face.getContour(FaceContour.LOWER_LIP_TOP) != null && face.getContour(FaceContour.UPPER_LIP_BOTTOM) != null &&
+                                                        mouthLeft != null && mouthRight != null && noseBase != null && mouthBottom != null) {
+                                                    // Get contours of teeth area
                                                     List<PointF> mouth_upper_points = face.getContour(FaceContour.LOWER_LIP_TOP).getPoints();
                                                     List<PointF> mouth_lower_points = face.getContour(FaceContour.UPPER_LIP_BOTTOM).getPoints();
                                                     List<PointF> mouth_points = new ArrayList<>();
                                                     mouth_points.addAll(mouth_lower_points);
                                                     mouth_points.addAll(mouth_upper_points);
-                                                    Path mouth_shape = new Path();
-                                                    mouth_shape.moveTo(mouth_points.get(0).x, mouth_points.get(0).y);
-                                                    for (PointF point: mouth_points) {
-                                                        mouth_shape.lineTo(point.x, point.y);
-                                                    }
-                                                    mouth_shape.lineTo(mouth_points.get(mouth_points.size() - 1).x, mouth_points.get(mouth_points.size() - 1).y);
-                                                    mouth_shape.close();
 
-                                                    Bitmap maskBitmap = getMaskBitmap(mutableBitmap, mouth_shape);
+                                                    // Create a polygon for teeth area
+                                                    Path mouthShape = createTeethPolygon(mouth_points);
 
+                                                    // Create Bitmap with masked teeth area
+                                                    Bitmap maskBitmap = getMaskBitmap(mutableBitmap, mouthShape);
+
+                                                    // Get coordinates of rectangle to be processed
                                                     int startX = (int) mouthLeft.getPosition().x;
                                                     int endX = (int) mouthRight.getPosition().x;
                                                     int startY = (int) noseBase.getPosition().y;
                                                     int endY = (int) mouthBottom.getPosition().y;
 
-                                                    int brightness;
-                                                    if (radioButton1.isChecked()) brightness = 30;
-                                                    else if (radioButton2.isChecked()) brightness = 60;
-                                                    else brightness = 80;
-                                                    doBrightness(mutableBitmap, maskBitmap, brightness, startX, endX, startY, endY);
+                                                    // Get chosen level of teeth whitening
+                                                    int brightness = getBrightness();
+
                                                     progressBar.setVisibility(View.VISIBLE);
+                                                    // Process the pixels in teeth area
+                                                    doBrightness(mutableBitmap, maskBitmap, brightness, startX, endX, startY, endY);
+                                                    showAlertDialog(mutableBitmap); // Dialog with processed image
+                                                    progressBar.setVisibility(View.INVISIBLE);
                                                 }
-
-
-                                                //imageView.setImageBitmap(mutableBitmap);
-                                                showAlertDialog(mutableBitmap);
-                                                progressBar.setVisibility(View.INVISIBLE);
-                                                    //details.setText(String.valueOf(finalProb) + "%" + "Happy");
+                                                else
+                                                    Toast.makeText(getContext(), "Не удалось обнаружить область рта", Toast.LENGTH_SHORT).show();
                                             }
                                         })
                                 .addOnFailureListener(
-                                        new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                // Task failed with an exception
-                                                // ...
-                                                Toast.makeText(getContext(), "Firebase failed to detect face", Toast.LENGTH_SHORT).show();
-                                            }
-                                        });
-
-                Face faces;
-
+                                        e -> Toast.makeText(getContext(), "Не удалось обнаружить лицо", Toast.LENGTH_SHORT).show());
             }
-
         });
     }
 
+    /* Create Bitmap with masked teeth area */
     private Bitmap getMaskBitmap(Bitmap bitmap, Path path) {
         Bitmap maskBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
         Paint paint = new Paint();
@@ -213,53 +189,60 @@ public class CameraFragment extends Fragment {
         return maskBitmap;
     }
 
-    public static void doBrightness(Bitmap src, Bitmap mask, int value, int startX, int endX, int startY, int endY) {
-        // color information
+    /* Process pixels of teeth area */
+    private static void doBrightness(Bitmap src, Bitmap mask, int value, int startX, int endX, int startY, int endY) {
+        // Color information
         int A, R, G, B;
         int pixel;
 
-        // scan through all pixels
-        for(int x = startX; x <= endX; ++x) {
-            for(int y = startY; y <= endY; ++y) {
+        // Scan through all pixels
+        for (int x = startX; x <= endX; ++x) {
+            for (int y = startY; y <= endY; ++y) {
                 pixel = src.getPixel(x, y);
                 A = Color.alpha(pixel);
                 R = Color.red(pixel);
                 G = Color.green(pixel);
                 B = Color.blue(pixel);
 
+                // Convert RGB values to grayscale
                 int gray = (int) (0.2989 * R + 0.5870 * G + 0.1140 * B);
 
+                // Check if pixel is inside masked area and is closer to white than black
                 if (mask.getPixel(x, y) == Color.GREEN && gray > 100) {
 
-                    // increase/decrease each channel
+                    // Increase/decrease each channel
                     R += value;
                     if (R > 255) {
                         R = 255;
-                    } else if (R < 0) {
+                    }
+                    else if (R < 0) {
                         R = 0;
                     }
 
                     G += value;
                     if (G > 255) {
                         G = 255;
-                    } else if (G < 0) {
+                    }
+                    else if (G < 0) {
                         G = 0;
                     }
 
                     B += value;
                     if (B > 255) {
                         B = 255;
-                    } else if (B < 0) {
+                    }
+                    else if (B < 0) {
                         B = 0;
                     }
 
-                    // apply new pixel color to output bitmap
+                    // Apply new pixel color to output Bitmap
                     src.setPixel(x, y, Color.argb(A, R, G, B));
                 }
             }
         }
     }
 
+    /* Show AlertDialog with the processed image */
     private void showAlertDialog(Bitmap bitmap) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AlertDialog);
         LayoutInflater inflater = getActivity().getLayoutInflater();
@@ -271,24 +254,27 @@ public class CameraFragment extends Fragment {
         smilingFace.setImageBitmap(bitmap);
 
         builder.setPositiveButton("ЗАГРУЗИТЬ", (alertDialog, which) -> {
-            FileOutputStream outputStream = null;
-            File sdCard = Environment.getExternalStorageDirectory();
-            File dir = new File(sdCard.getAbsolutePath() + "/Pictures");
-            dir.mkdir();
-            String filename = String.format("%d.jpg", System.currentTimeMillis());
-            File outFile = new File(dir, filename);
+            String storePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Pictures";
+            File appDir = new File(storePath);
+            if (!appDir.exists()) {
+                appDir.mkdir();
+            }
+            String fileName = System.currentTimeMillis() + ".jpg";
+            File file = new File(appDir, fileName);
             try {
-                outputStream = new FileOutputStream(outFile);
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-                outputStream.flush();
-                outputStream.close();
-
+                FileOutputStream fos = new FileOutputStream(file);
+                boolean isSuccess = bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                fos.flush();
+                fos.close();
+                MediaStore.Images.Media.insertImage(getContext().getContentResolver(), file.getAbsolutePath(), fileName, null);
+                Toast.makeText(getContext(), "Изображение сохранено!", Toast.LENGTH_SHORT).show();
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
+                Toast.makeText(getContext(), "Изображение 999!", Toast.LENGTH_SHORT).show();
             } catch (IOException e) {
                 e.printStackTrace();
+                Toast.makeText(getContext(), "Изображение ((((()))))!", Toast.LENGTH_SHORT).show();
             }
-            Toast.makeText(getContext(), "Изображение сохранено!", Toast.LENGTH_SHORT).show();
         });
 
         builder.setNegativeButton("ЗАКРЫТЬ", (alertDialog, which) -> {
@@ -297,5 +283,26 @@ public class CameraFragment extends Fragment {
 
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+    }
+
+    /* Create shape that defines teeth area */
+    private Path createTeethPolygon(List<PointF> mouth_points) {
+        Path mouthShape = new Path();
+        mouthShape.moveTo(mouth_points.get(0).x, mouth_points.get(0).y);
+        for (PointF point: mouth_points) {
+            mouthShape.lineTo(point.x, point.y);
+        }
+        mouthShape.lineTo(mouth_points.get(mouth_points.size() - 1).x, mouth_points.get(mouth_points.size() - 1).y);
+        mouthShape.close();
+        return mouthShape;
+    }
+
+    // Get chosen level of brightness according to Radio Buttons
+    private int getBrightness() {
+        int brightness;
+        if (radioButton1.isChecked()) brightness = 30;
+        else if (radioButton2.isChecked()) brightness = 60;
+        else brightness = 80;
+        return brightness;
     }
 }

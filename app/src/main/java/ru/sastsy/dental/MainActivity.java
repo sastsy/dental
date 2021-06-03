@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         collectionReference.document("1").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
-                if (document.exists()) {
+                if (!document.exists()) {
                     Map<String, Object> map = new HashMap<>();
                     for (int i = 0; i <= 31; ++i) {
                         toothList[i] = new Tooth(i + 1);
