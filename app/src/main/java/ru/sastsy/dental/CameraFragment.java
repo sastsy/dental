@@ -270,10 +270,8 @@ public class CameraFragment extends Fragment {
                 Toast.makeText(getContext(), "Изображение сохранено!", Toast.LENGTH_SHORT).show();
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
-                Toast.makeText(getContext(), "Изображение 999!", Toast.LENGTH_SHORT).show();
             } catch (IOException e) {
                 e.printStackTrace();
-                Toast.makeText(getContext(), "Изображение ((((()))))!", Toast.LENGTH_SHORT).show();
             }
         });
 

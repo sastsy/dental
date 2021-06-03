@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Jaw {
 
     private final String hostName;
-    private ArrayList<Tooth> toothList;
+    private final ArrayList<Tooth> toothList;
 
     public Jaw(String hostName) {
         this.hostName = hostName;
@@ -22,5 +22,9 @@ public class Jaw {
 
     public Tooth getTooth(int i) {
         return this.toothList.get(i);
+    }
+
+    public String getHostName() {
+        return this.hostName;
     }
 }
